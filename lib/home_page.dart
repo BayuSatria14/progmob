@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:progmob/login_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -10,7 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  static List<Widget> _pages = <Widget>[
+  final List<Widget> _pages = <Widget>[
     Center(child: Text('Menu Beranda')),
     Center(
         child: Column(
@@ -19,7 +22,7 @@ class _HomePageState extends State<HomePage> {
         Image.asset('assets/rumah_sakit.jpg', height: 500),
       ],
     )),
-    Center(child: Text('Menu Profil')),
+    Center(child: TextButton(onPressed: () {}, child: Text('Logout'))),
   ];
 
   void _onItemTapped(int index) {
@@ -27,6 +30,10 @@ class _HomePageState extends State<HomePage> {
       _selectedIndex = index;
     });
   }
+
+  final dio = Dio();
+  final myStorage = GetStorage();
+  final apiUrl = 'https://mobileapis.manpits.xyz/api';
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +46,7 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 15.0),
@@ -50,6 +58,22 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      goUser(dio, myStorage, apiUrl);
+                    },
+                    child: Text('Cek User'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      goLogout(context, dio, myStorage, apiUrl);
+                    },
+                    child: Text('Logout'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -77,5 +101,40 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped, // Menangani perubahan item yang dipilih
       ),
     );
+  }
+}
+
+void goUser(dio, myStorage, apiUrl) async {
+  try {
+    final response = await dio.get(
+      '$apiUrl/user',
+      options: Options(
+        headers: {'Authorization': 'Bearer ${myStorage.read('token')}'},
+      ),
+    );
+    print(response.data);
+  } on DioException catch (e) {
+    print('${e.response} - ${e.response?.statusCode}');
+  }
+}
+
+void goLogout(context, dio, myStorage, apiUrl) async {
+  try {
+    final response = await dio.get(
+      '$apiUrl/logout',
+      options: Options(
+        headers: {'Authorization': 'Bearer ${myStorage.read('token')}'},
+      ),
+    );
+    print(response.data);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(), // Navigasi ke HomePage
+      ),
+    );
+  } on DioException catch (e) {
+    print('${e.response} - ${e.response?.statusCode}');
   }
 }

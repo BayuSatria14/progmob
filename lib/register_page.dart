@@ -1,11 +1,20 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:progmob/login_page.dart';
 
 class RegisterPage extends StatelessWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  RegisterPage({Key? key}) : super(key: key);
 
   get black => null;
+
+  final dio = Dio();
+  final apiUrl = 'https://mobileapis.manpits.xyz/api';
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +44,7 @@ class RegisterPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: TextField(
+                controller: nameController,
                 decoration: InputDecoration(
                   labelText: 'Nama Lengkap',
                   labelStyle: const TextStyle(color: Colors.black),
@@ -48,8 +58,9 @@ class RegisterPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: TextField(
+                controller: emailController,
                 decoration: InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Email',
                   labelStyle: const TextStyle(color: Colors.black),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -61,23 +72,10 @@ class RegisterPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: TextField(
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  labelStyle: const TextStyle(color: Colors.black),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.black),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Konfirmasi Password',
                   labelStyle: const TextStyle(color: Colors.black),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -92,7 +90,8 @@ class RegisterPage extends StatelessWidget {
               height: 40,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Navigasi kembali ke halaman login
+                  goRegister(context, dio, apiUrl, nameController,
+                      emailController, passwordController);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color.fromARGB(255, 28, 237, 223),
@@ -117,5 +116,28 @@ class RegisterPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+void goRegister(BuildContext context, dio, apiUrl, nameController,
+    emailController, passwordController) async {
+  try {
+    final response = await dio.post(
+      '$apiUrl/register',
+      data: {
+        'name': nameController.text,
+        'email': emailController.text,
+        'password': passwordController.text,
+      },
+    );
+    print(response.data);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(), // Navigasi ke HomePage
+      ),
+    );
+  } on DioException catch (e) {
+    print('${e.response} - ${e.response?.statusCode}');
   }
 }
