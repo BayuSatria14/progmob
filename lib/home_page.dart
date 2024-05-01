@@ -22,7 +22,9 @@ class _HomePageState extends State<HomePage> {
         Image.asset('assets/rumah_sakit.jpg', height: 500),
       ],
     )),
-    Center(child: TextButton(onPressed: () {}, child: Text('Logout'))),
+    Center(
+      child: Center(child: Text('Menu profil')),
+    ),
   ];
 
   void _onItemTapped(int index) {
