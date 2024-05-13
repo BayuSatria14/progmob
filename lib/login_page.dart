@@ -4,15 +4,42 @@ import 'package:get_storage/get_storage.dart';
 import 'package:progmob/home_page.dart';
 import 'package:progmob/register_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final dio = Dio();
   final myStorage = GetStorage();
   final apiUrl = 'https://mobileapis.manpits.xyz/api';
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      checkLoginStatus();
+    });
+  }
+
+  void checkLoginStatus() {
+    final token = myStorage.read('token');
+    if (token != null) {
+      // Jika pengguna sudah login, arahkan ke halaman login page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(), // Navigasi ke HomePage
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
